@@ -59,8 +59,23 @@ todb\
 I ran ```search ssh_login```, and the first result was the one in the question, so I then ran ```use 0```, and then ```info```, which brought up the information about the module.
 
 ### Task 4:
+This task takes us through modifying parameters in a workspace, and using a module to establish a session.
+Parameters are set using the ```set``` command, the ```setg``` command to set variables globally (keeps the variable set until you close Metasploit or clear it using ```unsetg```), and once all the parameters are set you can use the ```exploit``` command, or the ```run``` alias for the command.
 
+#### Task 4 Questions:
+**How would you set the LPORT value to 6666?**\
+set LPORT 6666\
+
+**How would you set the global value for RHOSTS  to 10.10.19.23 ?**\
+setg RHOSTS 10.10.19.23\
+
+**What command would you use to clear a set payload?**\
+unset payload\
+
+**What command do you use to proceed with the exploitation phase?**\
+exploit\
+
+These are pretty straight forward if you follow the task.
 
 ## Conclusion and Learning Outcomes
-
-Highlight important methods and discoveries
+This room was a great introduction into how to use the Metasploit framework, and the questions were pretty straight-forward and mostly just asked for terms or commands described in the tasks. 
