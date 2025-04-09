@@ -64,16 +64,16 @@ Parameters are set using the ```set``` command, the ```setg``` command to set va
 
 #### Task 4 Questions:
 **How would you set the LPORT value to 6666?**\
-set LPORT 6666\
+set LPORT 6666
 
 **How would you set the global value for RHOSTS  to 10.10.19.23 ?**\
-setg RHOSTS 10.10.19.23\
+setg RHOSTS 10.10.19.23
 
 **What command would you use to clear a set payload?**\
-unset payload\
+unset payload
 
 **What command do you use to proceed with the exploitation phase?**\
-exploit\
+exploit
 
 These are pretty straight forward if you follow the task.
 
