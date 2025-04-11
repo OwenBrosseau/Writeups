@@ -27,7 +27,8 @@ This section focuses primarily on definitions:
 
 #### Task 2 Questions:
 **What is the name of the code taking advantage of a flaw on the target system?**\
-> Exploit\
+> Exploit
+
 The exploit takes advantage of a vulnerability on the target system.
 
 **What is the name of the code that runs on the target system to achieve the attacker's goal?**\
