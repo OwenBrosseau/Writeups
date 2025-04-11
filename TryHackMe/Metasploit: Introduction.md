@@ -27,19 +27,19 @@ This section focuses primarily on definitions:
 
 #### Task 2 Questions:
 **What is the name of the code taking advantage of a flaw on the target system?**\
-Exploit\
+> Exploit\
 The exploit takes advantage of a vulnerability on the target system.
 
 **What is the name of the code that runs on the target system to achieve the attacker's goal?**\
-Payload\
+> Payload\
 The payload is the code that is executed on the target system through the vulnerability.
 
 **What are self-contained payloads called?**\
-Singles\
+> Singles\
 By self-contained, the question refers to payloads that act on their own, rather than setting up a connection to the target and continuing the attack that way. Singles can be as simple as adding a user to the system or running notepad.exe.
 
 **Is "windows/x64/pingback_reverse_tcp" among singles or staged payload?**\
-Singles\
+> Singles\
 Googled this one, searching for "windows/x64/pingback_reverse_tcp" gave the github repository as the first result, where it was easy to see in the path (metasploit-framework/modules/payloads/**singles/windows**/x64/pingback_reverse_tcp.rb) that this file was under singles.
 
 ### Task 3:
@@ -51,11 +51,11 @@ The ```search``` command lets you check the Metasploit framework for relevant mo
 
 #### Task 3 Questions:
 **How would you search for a module related to Apache?**\
-search apache\
+> search apache\
 All we have to do is make "Apache" our search query.
 
 **Who provided the auxiliary/scanner/ssh/ssh_login module?**\
-todb\
+> todb\
 I ran ```search ssh_login```, and the first result was the one in the question, so I then ran ```use 0```, and then ```info```, which brought up the information about the module.
 
 ### Task 4:
@@ -64,16 +64,16 @@ Parameters are set using the ```set``` command, the ```setg``` command to set va
 
 #### Task 4 Questions:
 **How would you set the LPORT value to 6666?**\
-set LPORT 6666
+> set LPORT 6666
 
 **How would you set the global value for RHOSTS  to 10.10.19.23 ?**\
-setg RHOSTS 10.10.19.23
+> setg RHOSTS 10.10.19.23
 
 **What command would you use to clear a set payload?**\
-unset payload
+> unset payload
 
 **What command do you use to proceed with the exploitation phase?**\
-exploit
+> exploit
 
 These are pretty straight forward if you follow the task.
 
