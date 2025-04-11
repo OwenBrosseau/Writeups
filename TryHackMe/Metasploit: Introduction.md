@@ -26,22 +26,22 @@ This section focuses primarily on definitions:
 - **Post**: Modules meant for the final stage of exploitation, once a machine has been compromised.
 
 #### Task 2 Questions:
-**What is the name of the code taking advantage of a flaw on the target system?**\
+**What is the name of the code taking advantage of a flaw on the target system?**
 > Exploit
 
 The exploit takes advantage of a vulnerability on the target system.
 
-**What is the name of the code that runs on the target system to achieve the attacker's goal?**\
+**What is the name of the code that runs on the target system to achieve the attacker's goal?**
 > Payload
 
 The payload is the code that is executed on the target system through the vulnerability.
 
-**What are self-contained payloads called?**\
+**What are self-contained payloads called?**
 > Singles
 
 By self-contained, the question refers to payloads that act on their own, rather than setting up a connection to the target and continuing the attack that way. Singles can be as simple as adding a user to the system or running notepad.exe.
 
-**Is "windows/x64/pingback_reverse_tcp" among singles or staged payload?**\
+**Is "windows/x64/pingback_reverse_tcp" among singles or staged payload?**
 > Singles
 
 Googled this one, searching for "windows/x64/pingback_reverse_tcp" gave the github repository as the first result, where it was easy to see in the path (metasploit-framework/modules/payloads/**singles/windows**/x64/pingback_reverse_tcp.rb) that this file was under singles.
@@ -54,12 +54,12 @@ Running exploits is done using the ```use``` command followed by the exploit, or
 The ```search``` command lets you check the Metasploit framework for relevant modules. You can search by CVE number, exploit names, or target system. You can specify type and platform of the search if you want like this: ```search type:auxiliary telnet```.
 
 #### Task 3 Questions:
-**How would you search for a module related to Apache?**\
+**How would you search for a module related to Apache?**
 > search apache
 
 All we have to do is make "Apache" our search query.
 
-**Who provided the auxiliary/scanner/ssh/ssh_login module?**\
+**Who provided the auxiliary/scanner/ssh/ssh_login module?**
 > todb
 
 I ran ```search ssh_login```, and the first result was the one in the question, so I then ran ```use 0```, and then ```info```, which brought up the information about the module.
@@ -69,16 +69,16 @@ This task takes us through modifying parameters in a workspace, and using a modu
 Parameters are set using the ```set``` command, the ```setg``` command to set variables globally (keeps the variable set until you close Metasploit or clear it using ```unsetg```), and once all the parameters are set you can use the ```exploit``` command, or the ```run``` alias for the command.
 
 #### Task 4 Questions:
-**How would you set the LPORT value to 6666?**\
+**How would you set the LPORT value to 6666?**
 > set LPORT 6666
 
-**How would you set the global value for RHOSTS  to 10.10.19.23 ?**\
+**How would you set the global value for RHOSTS  to 10.10.19.23 ?**
 > setg RHOSTS 10.10.19.23
 
-**What command would you use to clear a set payload?**\
+**What command would you use to clear a set payload?**
 > unset payload
 
-**What command do you use to proceed with the exploitation phase?**\
+**What command do you use to proceed with the exploitation phase?**
 > exploit
 
 These are pretty straight forward if you follow the task.
