@@ -162,6 +162,39 @@ The user agent is: `Nim httpclient/1.6.6`
 
 ### Task 7: Discovery - Internal Reconnaissance
 #### Task 7 Questions:
+**The attacker was able to discover a sensitive file inside the machine of the user. What is the password discovered on the aforementioned file?**
+> infernotempest
+
+Looking through the base64 encoded data sent to the c2 domain, one has a $pass variable that seems to be what we are looking for.
+
+<img width="1430" height="712" alt="image" src="https://github.com/user-attachments/assets/fcfdcb9f-70c4-4835-90ed-a5ebdd595659" />
+
+**The attacker then enumerated the list of listening ports inside the machine. What is the listening port that could provide a remote shell inside the machine?**
+> 5985
+
+The request after the one we saw in the last question is the longest by far, and contains the information the attacker found from their enumeration.
+
+<img width="1497" height="773" alt="image" src="https://github.com/user-attachments/assets/05a48474-e820-46b9-a219-6decc54ea5d6" />
+
+Port 5985 is the default TCP port for Windows Remote Management (WinRM) over HTTP, and seems much more likely to be used for a remote shell than the others.
+
+**The attacker then established a reverse socks proxy to access the internal services hosted inside the machine. What is the command executed by the attacker to establish the connection?**
+
+*Format: Remove the double quotes from the log.*
+>
+
+**What is the SHA256 hash of the binary used by the attacker to establish the reverse socks proxy connection?**
+>
+
+**What is the name of the tool used by the attacker based on the SHA256 hash? Provide the answer in lowercase.**
+>
+
+**The attacker then used the harvested credentials from the machine. Based on the succeeding process after the execution of the socks proxy, what service did the attacker use to authenticate?**
+
+*Format: Answer in lowercase*
+>
+
+
 ### Task 8: Privilege Escalation - Exploiting Privileges
 #### Task 8 Questions:
 ### Task 9: Actions on Objective - Fully-owned Machine
