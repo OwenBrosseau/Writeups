@@ -4,6 +4,17 @@
 
 This room is a capstone challenge for the SOC 1 learning path. 
 
+You are tasked to conduct an investigation from a workstation affected by a full attack chain.
+
+Tools used in this task:
+- Event Viewer
+- EvtxECmd
+- SysmonView
+- Timeline Explorer
+- Wireshark
+
+The instructions do suggest using Brim occasionally but I never had to
+
 ### Task 3: Preparation - Tools and Artifacts
 This task shows us how to prepare the data for use with Timeline Explorer, as well as SysmonView
 
@@ -166,6 +177,9 @@ The next 3 questions all have to do with what is shown in the last image
 The user agent is: `Nim httpclient/1.6.6`
 
 ### Task 7: Discovery - Internal Reconnaissance
+
+Now we have to decode the base64 payloads to see what the attacker has been doing.
+
 #### Task 7 Questions:
 **The attacker was able to discover a sensitive file inside the machine of the user. What is the password discovered on the aforementioned file?**
 > infernotempest
@@ -212,14 +226,107 @@ Searching for the hash on VirusTotal shows a malicious file. The Names section g
 This is the service associated with the port we found earlier that could provide a remote shell.
 
 ### Task 8: Privilege Escalation - Exploiting Privileges
+
+We know that the attacker has gained a stable shell through a reverse socks proxy.
+The task tells us to look for these events:
+- Look for events executed after the successful execution of the reverse socks proxy tool.
+- Look for potential privilege escalation attempts, as the attacker has already established a persistent low-privilege access.
+
 #### Task 8 Questions:
+**After discovering the privileges of the current user, the attacker then downloaded another binary to be used for privilege escalation. What is the name and the SHA256 hash of the binary?**
+
+*Format: binary name,SHA256 hash*
+> spf.exe,8524FBC0D73E711E69D60C64F1F1B7BEF35C986705880643DD4D5E17779E586D
+
+I first searched for winrm, the service we found in the last task, in Timeline Explorer.
+Two entries appeared, both with `wsmprovhost.exe` as their executable, so I searched for that next.
+
+<img width="1067" height="252" alt="image" src="https://github.com/user-attachments/assets/5e7c208c-a3d4-4ee2-a3d5-025e679a3aeb" />
+
+We can see where the attacker used `whoami /priv` to discover the privileges of the current user, as stated in the question.
+The attacker then downloaded 2 more files using iwr from the `phishteam.xyz` domain.
+`final.exe` is then run using `spf.exe`
+By examining the event where `spf.exe` is executed, we can see the hash of the binary.
+
+**Based on the SHA256 hash of the binary, what is the name of the tool used?**
+
+*Format: Answer in lowercase*
+> printspoofer
+
+Searching for the hash we found on VirusTotal, we can see the Names section, where "printspoofer" and variations of it seem to be the most common name that doesn't impersonate a system service.
+
+<img width="369" height="331" alt="image" src="https://github.com/user-attachments/assets/8c6ba31f-a011-4ffa-9d59-e9be9c3e461d" />
+
+**The tool exploits a specific privilege owned by the user. What is the name of the privilege?**
+> SeImpersonatePrivilege
+
+Searching for "printspoofer", I found the github repository, where it is stated in the description that the tool abuses `SeImpersonatePrivilege`.
+
+**Then, the attacker executed the tool with another binary to establish a c2 connection. What is the name of the binary?**
+> final.exe
+
+This information is found in the event we saw earlier where `spf.exe` was used to run `final.exe`
+
+**The binary connects to a different port from the first c2 connection. What is the port used?**
+> 8080
+
+Filtering the events for Network Connections (Event ID 3), and looking for events that happened shortly after when `spf.exe` was used to run `final.exe`, we can see multiple connections to `167.71.222.162`, all connecting to port `8080`
+
 ### Task 9: Actions on Objective - Fully-owned Machine
+
+- Useful Brim filter to get all HTTP requests related to the malicious C2 traffic : `_path=="http" "<replace domain>" id.resp_p==<replace port> | cut ts, host, id.resp_p, uri | sort ts`
+- The attacker gained SYSTEM privileges; now, the user context for each malicious execution blends with NT Authority\System.
+- All child events of the new malicious binary used for C2 are worth checking.
+
 #### Task 9 Questions:
+**Upon achieving SYSTEM access, the attacker then created two users. What are the account names?**
+
+*Format: Answer in alphabetical order - comma delimited*
+> shion,shuna
+
+Filtering for events with `final.exe` as the parent process, we can see two `"C:\Windows\system32\net.exe" user /add` commands used to create the users.
+
+<img width="1050" height="197" alt="image" src="https://github.com/user-attachments/assets/a77ef0a1-6e72-4242-9db7-87fac5638f87" />
+
+**Prior to the successful creation of the accounts, the attacker executed commands that failed in the creation attempt. What is the missing option that made the attempt fail?**
+> /add
+
+Shortly before the other users were added, this command was run:
+
+<img width="848" height="45" alt="image" src="https://github.com/user-attachments/assets/84c78763-e95e-4fa6-98a0-89c2a7cd0769" />
 
 
+**Based on windows event logs, the accounts were successfully created. What is the event ID that indicates the account creation activity?**
+> 4720
 
+Since I was looking in Timeline Explorer, I decided to look at the Windows Event Logs just after the time that the account creation events that we saw in Timeline Explorer occurred (17:27:28).
 
+<img width="885" height="478" alt="image" src="https://github.com/user-attachments/assets/87a24a38-4437-4896-b98f-df5152fc3dd5" />
 
+**The attacker added one of the accounts in the local administrator's group. What is the command used by the attacker?**
+> net localgroup administrators /add shion
 
+This command was run shortly after the accounts were created
+
+<img width="650" height="571" alt="image" src="https://github.com/user-attachments/assets/2ec1f136-4f18-4e99-bc97-42aaf4da7585" />
+
+**Based on windows event logs, the account was successfully added to a sensitive group. What is the event ID that indicates the addition to a sensitive local group?**
+> 4732
+
+Looking at the Windows Event Logs at the time that the command found in the last question was executed (17:27:41), we can see the event we are looking for.
+
+<img width="882" height="508" alt="image" src="https://github.com/user-attachments/assets/70202b98-9400-42b3-9bb3-646e22e59a79" />
+
+**After the account creation, the attacker executed a technique to establish persistent administrative access. What is the command executed by the attacker to achieve this?**
+
+*Format: Remove the double quotes from the log.*
+> C:\Windows\system32\sc.exe \\TEMPEST create TempestUpdate2 binpath= C:\ProgramData\final.exe start= auto
+
+This command can be found by filtering for events with `final.exe` as their parent process
+
+<img width="1085" height="446" alt="image" src="https://github.com/user-attachments/assets/39ec94ca-3f8c-4abf-b3e0-7fb3c1b7a3a3" />
 
 ## Conclusion and Learning Outcomes
+
+In this room, I got to use some tools that I did not have a lot of practice with. I particularly liked SysmonView, which gave useful visualizations of some event relations.
+I am finding that I am getting better at looking through logs and being able to notice which events have useful information, though I need to get a little better at filtering for what I want to find, particularly in EventViewer.
