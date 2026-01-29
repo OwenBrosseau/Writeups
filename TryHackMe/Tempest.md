@@ -36,6 +36,7 @@ Tools used in this task:
 
 The instructions do suggest using Brim occasionally but I never had to.
 
+Task 1 shows us how to deploy the machine for this room, and Task 2 explains Log Analysis and Event Correlation, so we will start at Task 3. 
 ___
 
 ### Task 3: Preparation - Tools and Artifacts
