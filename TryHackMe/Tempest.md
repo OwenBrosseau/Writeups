@@ -2,13 +2,21 @@
 
 ## Table of Contents
 [Introduction](#introduction)
+
 [Task 3: Preparation - Tools and Artifacts](#task-3-preparation---tools-and-artifacts)
+
 [Task 4: Initial Access - Malicious Document](#task-4-initial-access---malicious-document)
+
 [Task 5: Initial Access - Stage 2 execution](#task-5-initial-access---stage-2-execution)
+
 [Task 6: Initial Access - Malicious Document Traffic](#task-6-initial-access---malicious-document-traffic)
+
 [Task 7: Discovery - Internal Reconnaissance](#task-7-discovery---internal-reconnaissance)
+
 [Task 8: Privilege Escalation - Exploiting Privileges](#task-8-privilege-escalation---exploiting-privileges)
+
 [Task 9: Actions on Objective - Fully-owned Machine](#task-9-actions-on-objective---fully-owned-machine)
+
 [Conclusions and Learning Outcomes](#conclusion-and-learning-outcomes)
 
 ## Introduction
