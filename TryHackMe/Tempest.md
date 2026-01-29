@@ -79,7 +79,7 @@ Additionally, the tasks has some notes for us:
 
 Searching for file creation events (Event ID 11) and file stream creation events (Event ID 15) near the start of the logs, we can find the events where the malicious file was downloaded.
 
-<img width="849" height="749" alt="image" src="https://github.com/user-attachments/assets/60e3458e-b0fd-4230-bd8c-55a3c800f634" />
+<img width="856" height="726" alt="image" src="https://github.com/user-attachments/assets/fcb4a4ff-c1d4-4373-81c0-0f5f857b5e71" />
 
 **What is the name of the compromised user and machine?**
 
