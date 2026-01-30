@@ -399,5 +399,9 @@ The attacker then used `wsmprovhost.exe`, checked their privileges, and download
 
 Lastly the attacker used `sc.exe` to make `final.exe` run on startup using the command `C:\Windows\system32\sc.exe \TEMPEST create TempestUpdate2 binpath= C:\ProgramData\final.exe start= auto`. This allows the attacker to have persistent administrative access.
 
+___
+
+### Conclusions
+
 In this room, I got to use some tools that I did not have a lot of practice with. I particularly liked SysmonView, which gave useful visualizations of some event relations.
 I am finding that I am getting better at looking through logs and being able to notice which events have useful information, though I need to get a little better at filtering for what I want to find, particularly in EventViewer.
