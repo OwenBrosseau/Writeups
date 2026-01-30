@@ -17,7 +17,7 @@
 
 [Task 9: Actions on Objective - Fully-owned Machine](#task-9-actions-on-objective---fully-owned-machine)
 
-[Conclusions and Learning Outcomes](#conclusion-and-learning-outcomes)
+[Summary and Conclusion](#summary-and-conclusion)
 
 ___
 
@@ -378,7 +378,7 @@ This command can be found by filtering for events with `final.exe` as their pare
 
 ___
 
-## Conclusion and Learning Outcomes
+## Summary and Conclusion
 
 ### Sequence of Events:
 The user `benimaru` on the computer `TEMPEST` downloaded a malicious file `free_magicules.doc` from the malicious domain `phishteam.xyz` through the Chrome browser. This domain resolves to `167.71.199.191`.
@@ -398,6 +398,11 @@ The attacker then used `wsmprovhost.exe`, checked their privileges, and download
 `spf.exe` was used to run `final.exe`, which made c2 connections to `167.71.222.162:8080`. `final.exe` created 2 users, `shion` and `shuna`. `shion` was then added to the local administrator's group. 
 
 Lastly the attacker used `sc.exe` to make `final.exe` run on startup using the command `C:\Windows\system32\sc.exe \TEMPEST create TempestUpdate2 binpath= C:\ProgramData\final.exe start= auto`. This allows the attacker to have persistent administrative access.
+
+### Important Takeaways:
+- The password `infernotempest` was leaked.
+- There is a script in the Startup folder (`C:\Users\benimaru\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup`), and `C:\ProgramData\final.exe` is set to run on startup.
+- There are 2 user accounts that were created by the attacker: `shion` and `shuna`, `shion` being in the administrator group.
 
 ___
 
