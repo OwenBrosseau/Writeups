@@ -114,7 +114,7 @@ To find this, we filter for events with ParentProcessID matching the PID of the 
 *Format: XXXX-XXXXX*
 > 2022-30190
 
-I had to search for the start of the command on Google: `C:\Windows\SysWOW64\msdt.exe ms-msdt:/id PCWDiagnostic /skip force /param`. This showed me the Follina RCE Vulnerability, CVE 2022-30190.
+I had to search for the start of the command on Google: `C:\Windows\SysWOW64\msdt.exe ms-msdt:/id PCWDiagnostic /skip force /param`. This showed me the Follina RCE Vulnerability, [CVE 2022-30190](https://nvd.nist.gov/vuln/detail/cve-2022-30190).
 
 ___
 
@@ -379,6 +379,25 @@ This command can be found by filtering for events with `final.exe` as their pare
 ___
 
 ## Conclusion and Learning Outcomes
+
+### Sequence of Events:
+The user `benimaru` on the computer `TEMPEST` downloaded a malicious file `free_magicules.doc` from the malicious domain `phishteam.xyz` through the Chrome browser. This domain resolves to `167.71.199.191`.
+
+This malicious document was then opened with Microsoft Word, and it used the Follina RCE Vulnerability ([CVE 2022-30190](https://nvd.nist.gov/vuln/detail/cve-2022-30190)) to remotely execute bash commands that were encoded in base64.
+
+The commands downloaded a secondary payload from the same malicious domain, this time downloading `update.zip`, extracting the contents to the Startup folder (`C:\Users\benimaru\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup`), and removing the original `update.zip`.
+
+When this startup program executed it downloaded another file using certutil, this time a malicious binary `first.exe`, and ran it. `first.exe` connected to a c2 server on a new malicious domain `resolvecyber.xyz:80`, which resolves to `167.71.222.162`.
+
+These connections were `HTTP GET requests` to this URL: `resolvecyber.xyz/9ab62b5`. Commands and their results that were run on the compromised machine were sent in the parameters for these requests, encoded in base64.
+
+These commands were able to enumerate some privileges and user groups, and found and exfiltrated the password `infernotempest`. It then downloaded another file `ch.exe` from the first malicious domain, `http://phishteam.xyz/02dcf07/ch.exe`, to the dowloads folder (`C:\Users\benimaru\Downloads`) and used it to open a reverse socks proxy on the machine, connecting to `167.71.199.191:8080` (the first malicious domain, `phishteam.xyz`). This file `ch.exe` is a tool called [chisel](https://www.virustotal.com/gui/file/8a99353662ccae117d2bb22efd8c43d7169060450be413af763e8ad7522d2451).
+
+The attacker then used `wsmprovhost.exe`, checked their privileges, and downloaded `spf.exe` and `final.exe` from the `phishteam.xyz` domain. `spf.exe` is a tool called [printspoofer](https://www.virustotal.com/gui/file/8524fbc0d73e711e69d60c64f1f1b7bef35c986705880643dd4d5e17779e586d), which exploits the user's `SeImpersonatePrivilege` privilege.
+
+`spf.exe` was used to run `final.exe`, which made c2 connections to `167.71.222.162:8080`. `final.exe` created 2 users, `shion` and `shuna`. `shion` was then added to the local administrator's group. 
+
+Lastly the attacker used `sc.exe` to make `final.exe` run on startup using the command `C:\Windows\system32\sc.exe \TEMPEST create TempestUpdate2 binpath= C:\ProgramData\final.exe start= auto`. This allows the attacker to have persistent administrative access.
 
 In this room, I got to use some tools that I did not have a lot of practice with. I particularly liked SysmonView, which gave useful visualizations of some event relations.
 I am finding that I am getting better at looking through logs and being able to notice which events have useful information, though I need to get a little better at filtering for what I want to find, particularly in EventViewer.
