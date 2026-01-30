@@ -402,7 +402,7 @@ Lastly the attacker used `sc.exe` to make `final.exe` run on startup using the c
 ### Important Takeaways:
 - The password `infernotempest` was leaked.
 - There is a script in the Startup folder (`C:\Users\benimaru\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup`), and `C:\ProgramData\final.exe` is set to run on startup.
-- There are 2 user accounts that were created by the attacker: `shion` and `shuna`, `shion` being in the administrator group.
+- There are 2 user accounts that were created by the attacker: `shion` and `shuna`, and `shion` was added to the administrator group.
 
 ___
 
