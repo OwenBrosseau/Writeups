@@ -76,14 +76,14 @@ We first go to the `/usr/share/peass/linpeas` folder, and start `python3 -m http
 
 In the `linpeas.sh` output, we can see one file identified as a Process with capability sets (non-zero CapEff/CapAmb, limit 40) (T1548.001)
 
-![[Pasted image 20261104211424.png]]
+<img width="732" height="170" alt="Pasted image 20261104211424" src="https://github.com/user-attachments/assets/0249ef4b-c5d6-466f-bf5a-d7cea7b38c52" />
 
 **What is the full path to the binary on this machine has special capabilities that can be abused to obtain root privileges?**
 > /usr/bin/python3.8
 
-Now to root the machine. Searching for `python3.8 T1548.001` leads me to information about abusing SetUID and SetGID permissions for python, allowing us to create a root shell with `c`.
+Now to root the machine. Searching for `python3.8 T1548.001` leads me to information about abusing SetUID and SetGID permissions for python, allowing us to create a root shell with `python3.8 -c 'import os; os.setuid(0); os.system("/bin/bash")'`.
 
-![[Pasted image 20261104212215.png]]
+<img width="622" height="35" alt="Pasted image 20261104212215" src="https://github.com/user-attachments/assets/78a88bf8-f831-448d-81a0-eba953d812ae" />
 
 Now that we are root, we just navigate to `/root` and print the root flag with `cat root.txt`
 
