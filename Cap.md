@@ -9,7 +9,7 @@ An Easy difficulty machine focused on an HTTP server performing administrative f
 ### Cap
 We are given an IP Address, so I start by running an nmap scan of the target: `sudo nmap -sV -sC -oA Cap [Target IP] -p-`
 
-![[Pasted image 20261104193653.png]]
+<img width="763" height="328" alt="Pasted image 20261104193653" src="https://github.com/user-attachments/assets/7934bc54-26cb-4987-81ff-7f6dc6ebfb0c" />
 
 **How many TCP ports are open?**
 > 3
@@ -17,7 +17,8 @@ We are given an IP Address, so I start by running an nmap scan of the target: `s
 From these open services, the HTTP server looks most interesting, since I could not find any significant vulnerabilities in the FTP and SSH ports.
 
 Visiting the HTTP page shows us a dashboard:
-![[Pasted image 20261104194618.png]]
+
+<img width="884" height="724" alt="Pasted image 20261104194618" src="https://github.com/user-attachments/assets/0c00f3df-81ee-4c76-8ae4-42ef178a743d" />
 
 In the menu at the top left, there are four entries in the Dashboard menu:
 - Dashboard
@@ -34,21 +35,21 @@ Investigating the Security Snapshot (5 Second PCAP + Analysis) endpoint, we see 
 
 We can try changing the 1 to another value to see what it returns.
 
-![[Pasted image 20261104200152.png]]
+<img width="889" height="803" alt="Pasted image 20261104200152" src="https://github.com/user-attachments/assets/73147a5c-c98c-47db-9ae1-ff6914dff3bf" />
 
 **Are you able to get to other users' scans?**
 > yes
 
 Changing the value from 1 to 0 gives us another Packet Capture result, with some actual entries, so we can download it and check it out.
 
-![[Pasted image 20261104200308.png]]
+<img width="885" height="767" alt="Pasted image 20261104200308" src="https://github.com/user-attachments/assets/0939cc0e-bb18-4638-a6ef-cfa607c69dbd" />
 
 **What is the ID of the PCAP file that contains sensitive data?**
 > 0
 
 The file we get is 0.pcap, so we open the PCAP file with Wireshark.
 
-![[Pasted image 20261104201012.png]]
+<img width="1739" height="580" alt="Pasted image 20261104201012" src="https://github.com/user-attachments/assets/0e057875-e8ac-4fed-8562-7a5d586a15b8" />
 
 There aren't many packets here, so looking through it's pretty easy to spot USER and PASS being passed in plaintext. Maybe we can use this on the website.
 
@@ -62,7 +63,7 @@ The next place to try is the SSH port that we found open earlier. There, the log
 **We've managed to collect nathan's FTP password. On what other service does this password work?**
 > ssh
 
-![[Pasted image 20261104201652.png]]
+<img width="666" height="730" alt="Pasted image 20261104201652" src="https://github.com/user-attachments/assets/604c67fc-4165-4360-9039-e3695b038116" />
 
 Here, there is one file, `user.txt`, that has the user flag in it.
 
