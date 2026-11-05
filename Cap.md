@@ -7,7 +7,7 @@ An Easy difficulty machine focused on an HTTP server performing administrative f
 ## Process
 
 ### Cap
-We are given an IP Address, so I start by running an nmap scan of the target: `sudo nmap -sV -sC -oA Cap [Target IP] -p-`
+We are given an IP Address, so we start by running an nmap scan of the target: `sudo nmap -sV -sC -oA Cap [Target IP] -p-`
 
 <img width="763" height="328" alt="Pasted image 20261104193653" src="https://github.com/user-attachments/assets/7934bc54-26cb-4987-81ff-7f6dc6ebfb0c" />
 
